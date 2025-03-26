@@ -66,7 +66,7 @@ always @(*) begin
 end
 always @(*) begin
     case(ctrl)
-        4'b0000, 4'b0001: carry = ( {x[7],x} + {y[7],y} ) >> 8;
+        4'b0000, 4'b0001: carry = ( {1'b0,x} + {1'b0,y} ) >> 8;
         default: carry = 1'b0;
     endcase
 end

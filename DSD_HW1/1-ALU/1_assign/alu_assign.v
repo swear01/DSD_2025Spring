@@ -66,7 +66,9 @@ assign out =    ctrl == 4'b0000 ? x + y :
                 ctrl == 4'b1110 ? 8'b0 :
                 8'b0 ; // ctrl == 4'b1111
 
-assign carry = ( {x[7],x} + {y[7],y} ) >> 8;
+assign carry = (ctrl == 4'b0000 || ctrl == 4'b0001) ?
+                ( {1'b0,x} + {1'b0,y} ) >> 8 :
+                1'b0 ;
 
 // region: comb logic
 

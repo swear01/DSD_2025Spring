@@ -22,8 +22,9 @@ output [7:0] busX, busY;
 
 // region: variable
 
-reg [7:0] regfile [7:0] = 
+reg [7:0] regfile [7:0] ;
 reg [7:0] regfile_next [7:0];
+reg already_rst = 1'b0 ;
 
 integer i;
     
@@ -33,26 +34,39 @@ integer i;
 assign busX = regfile[RX];
 assign busY = regfile[RY];
 
-// region: always
-always @(posedge Clk) begin
+// region: combitional
+always @(*) begin
     // default
     // using for loop
-    for (i = 0; i < 8; i = i + 1) begin
-        regfile_next[i] = regfile[i];
-    end
-
-    if (WEN) begin
-        regfile_next[RW] = busW;
+    if (regfile[1][0] != 1'b0 && regfile[1][0] != 1'b1) begin
+        for (i = 0; i < 8; i = i + 1) begin
+            regfile_next[i] = 8'b0 ;
+        end
     end
     else begin
-        regfile_next[RW] = regfile[RW];
+        for (i = 1; i < 8; i = i + 1) begin
+            regfile_next[i] = regfile[i];
+        end
+    
+        if (WEN && RW != 3'b0) begin
+            regfile_next[RW] = busW;
+        end 
     end
 end
 
 // region: sequential
 always @(posedge Clk) begin
-    for (i = 0; i < 8; i = i + 1) begin
-        regfile[i] <= regfile_next[i];
+    regfile[0] <= 8'b0 ;
+    if (!already_rst ) begin
+        already_rst <=  1'b1;
+        for (i = 1; i < 8; i = i + 1) begin
+            regfile[i] <= 8'b0 ;
+        end
+    end
+    else begin
+        for (i = 1; i < 8; i = i + 1) begin
+            regfile[i] <= regfile_next[i];
+        end
     end
 end
 

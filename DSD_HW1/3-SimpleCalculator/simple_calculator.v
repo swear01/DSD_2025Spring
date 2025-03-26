@@ -27,10 +27,11 @@ module simple_calculator(
 
 // region: variable
 
-reg [7:0] busX;
-reg [7:0] alu_x ;
+wire [7:0] busX;
+wire [7:0] busW;
+wire [7:0] mux_out ;
 
-assign alu_x = Sel ? busY : DataIn; // mux
+assign mux_out = Sel ? busX : DataIn; // mux
 
 // region: module  
 
@@ -40,18 +41,18 @@ register_file regfile(
     .RW(RW),
     .RX(RX),
     .RY(RY),
-    .busW(DataIn),
+    .busW(busW),
     .busX(busX),
     .busY(busY)
 );
 
-alu_always alu(
+alu_assign alu(
 // alu_assign alu(
     .ctrl(Ctrl),
-    .x(alu_x),
-    .y(DataIn),
+    .x(mux_out),
+    .y(busY),
     .carry(Carry),
-    .out(busY)
+    .out(busW)
 );    
 
 

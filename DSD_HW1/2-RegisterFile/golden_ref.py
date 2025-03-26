@@ -1,6 +1,6 @@
 class RegisterFile:
     def __init__(self):
-        self.regfile = [255] * 8  # 8 registers, each 8-bit wide
+        self.regfile = [0] + [255]* 7  # 8 registers, each 8-bit wide
 
     def read(self, rx, ry) -> tuple[int, int]: # bus_x and bus_y
         """Read values from registers RX and RY."""
@@ -8,7 +8,7 @@ class RegisterFile:
 
     def write(self, wen, rw, bus_w):
         """Write value to register RW if write enable (WEN) is set."""
-        if wen:
+        if wen and rw != 0: # RW0 is hardwired to 0
             self.regfile[rw] = bus_w & 0xFF  # Ensure 8-bit storage
 
     def step(self, wen, rw, rx, ry, bus_w):
@@ -32,5 +32,6 @@ for data in test_data:
 
 with open("reg.data", "w") as f:
     for data in golden_ref:
-        f.write(" ".join(map(str, data)) + "\n")
+        # wen rw rx ry bus_w bus_x bus_y
+        f.write(f'{data[0]:1b} {data[1]:3b} {data[2]:3b} {data[3]:03b} {data[4]:08b} {data[5]:08b} {data[6]:08b}\n')
 

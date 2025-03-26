@@ -11,7 +11,7 @@ module alu_assign_tb;
     wire       carry;
     wire [7:0] out;
     
-    alu_assign alu_assign(
+    alu_always alu(
         ctrl     ,
         x        ,
         y        ,
@@ -20,6 +20,7 @@ module alu_assign_tb;
     );
 
     integer data_file;
+    integer num_fail = 0 ;
     reg [7:0] golden_out;
     reg       golden_carry;
 
@@ -50,13 +51,18 @@ module alu_assign_tb;
             // print inputs
             $display("ctrl=%b x=%b y=%b", ctrl, x, y);
             // wait for 1 cycle
+            #(`CYCLE);
             // validate
             $display("carry, out=%b, %b, golden=%b, %b", carry, out, golden_carry, golden_out);
             if( carry == golden_carry && out == golden_out ) $display( "PASS\n" );
-            else $display( "FAIL\n" );
+            else begin
+                $display( "FAIL\n" );
+                num_fail = num_fail + 1 ;
+            end
             // wait for 1 cycle
             #(`CYCLE);
         end
+        $display("The number of fail case is %d.\n", num_fail) ;
         // finish tb
         $finish;
     end
