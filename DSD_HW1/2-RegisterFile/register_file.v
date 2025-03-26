@@ -8,23 +8,52 @@ module register_file(
     busX ,
     busY
 );
+// region: I/O
 input        Clk, WEN;
 input  [2:0] RW, RX, RY;
 input  [7:0] busW;
 output [7:0] busX, busY;
     
-// write your design here, you can delcare your own wires and regs. 
-// The code below is just an eaxmple template
-reg [7:0] r0_w, r1_w, r2_w, r3_w, r4_w, r5_w, r6_w, r7_w;
-reg [7:0] r0_r, r1_r, r2_r, r3_r, r4_r, r5_r, r6_r, r7_r;
+// region: spec
 
+// the register file has 8 registers, each 8-bit wide
+// the register file has 2 read ports and 1 write port
+// the register file has 1 write enable signal
+
+// region: variable
+
+reg [7:0] regfile [7:0] = 
+reg [7:0] regfile_next [7:0];
+
+integer i;
     
-always@(*) begin
 
+// region: assign
+
+assign busX = regfile[RX];
+assign busY = regfile[RY];
+
+// region: always
+always @(posedge Clk) begin
+    // default
+    // using for loop
+    for (i = 0; i < 8; i = i + 1) begin
+        regfile_next[i] = regfile[i];
+    end
+
+    if (WEN) begin
+        regfile_next[RW] = busW;
+    end
+    else begin
+        regfile_next[RW] = regfile[RW];
+    end
 end
 
-always@(posedge Clk) begin
-
-end	
+// region: sequential
+always @(posedge Clk) begin
+    for (i = 0; i < 8; i = i + 1) begin
+        regfile[i] <= regfile_next[i];
+    end
+end
 
 endmodule
