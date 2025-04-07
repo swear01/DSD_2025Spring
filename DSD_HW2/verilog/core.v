@@ -123,3 +123,227 @@ module core(clk,
     // region: sequential
     
 endmodule
+
+// Single Cycle RISC-V CPU Control Unit  
+// Author: Swear01
+
+module Control (
+    instruction,
+    jalr,
+    jal,
+    branch,
+    mem_read,
+    mem_write,
+    mem_to_reg,
+    alu_src,
+    reg_write
+)
+
+    // region: I/O
+    input           clk ;
+    input           rst_n ;
+    input [6:0]     instruction ;
+    
+    output          jalr ;
+    output          jal ;
+    output          branch ;
+    output          mem_read ;
+    output          mem_write ;
+    output          mem_to_reg ;
+    output          alu_src ;
+    output          reg_write ;
+
+
+    // region: spec
+    // Support instructions:add, sub, and, or, slt, lw, sw, beq, jal, jalr
+    // add sub and or slt 
+    //      0110011 R
+    // lw   0000011 I
+    // sw   0100011 S
+    // beq  1100011 SB
+    // jal  1101111 UJ
+    // jalr 1100111 I
+
+    // region: param
+
+    // region: func
+
+    // region: variable
+
+    // region: modules
+
+    // region: assign
+    assign jalr         = (instruction == 7'b1100111) ? 1'b1 : 1'b0 ;
+    assign jal          = (instruction == 7'b1101111) ? 1'b1 : 1'b0 ;
+    assign branch       = (instruction == 7'b1100011) ? 1'b1 : 1'b0 ;
+    assign mem_read     = (instruction == 7'b0000011) ? 1'b1 : 1'b0 ;
+    assign mem_write    = (instruction == 7'b0100011) ? 1'b1 : 1'b0 ;
+    assign mem_to_reg   = (instruction == 7'b0000011) ? 1'b1 : 1'b0 ;
+    // Only R-type requires alu_src = 0
+    assign alu_src      = (instruction == 7'b0110011) ? 1'b0 : 1'b1 ;
+    // While SW, disallow reg_write
+    assign reg_write    = (instruction == 7'b0100011) ? 1'b0 : 1'b1 ;
+    // alu_op
+    
+
+    // region: comb
+
+    // region: sequential
+
+
+endmodule
+
+// Single Cycle CPU Immediate Generator
+
+module Imm_Gen (
+    input   [31:0]      instruction,
+    output  [31:0]  reg imm
+);
+
+    
+// region: I/O
+
+// region: spec
+
+// region: param
+
+// to implement: I-type, S-type, B-type, U-type, J-type
+// lw   0000011 I-type
+// sw   0100011 S-type
+// beq  1100011 B-type
+// jal  1101111 U-type
+// jalr 1100111 J-type
+
+// region: func
+
+// region: variable
+
+// region: modules
+
+// region: assign
+
+// region: comb
+// TODO: implement by seperating into parts
+always @(*) begin
+    case(instruction[6:0]) //synopsys full_case parallel_case
+        7'b0000011: // I-type
+            imm = {{20{instruction[31]}}, instruction[30:20]};
+        7'b0100011: // S-type
+            imm = {{20{instruction[31]}}, instruction[30:25], instruction[11:7]};
+        7'b1100011: // B-type
+            imm = {{19{instruction[31]}}, instruction[7], instruction[30:25], instruction[11:8], 1'b0};
+        7'b1101111: // U-type
+            imm = {instruction[31:12], 12'b0};
+        7'b1100111: // J-type
+            imm = {{11{instruction[31]}}, instruction[19:12], instruction[20], instruction[30:21], 1'b0};
+        default: 
+            imm = 32'b0; 
+    endcase
+end
+
+// region: sequential
+
+endmodule
+
+// Single Cycle RISC-V CPU ALU  
+
+module ALU(
+    input       [31:0] data1,
+    input       [31:0] data2,
+    input       [ 3:0] alu_ctrl,
+    output reg  [31:0] result
+    output             zero
+)
+
+    // region: I/O
+
+    // region: spec
+    // To implement: add, sub, and, or, slt
+
+
+    // Code Functions   Instructions
+    // 0000 AND         AND
+    // 0001 OR          OR
+    // 0010 ADD         SW, LW
+    // 0110 SUBSTRACT   SUB, Branch
+    // 1000 SLT         SLT
+
+    // region: param
+
+    // region: func
+
+    // region: variable
+    genvar i;  
+    wire [31:0] temp;
+
+
+    // region: modules
+
+    // region: assign
+    assign zero = ((~ read_data1 ^ read_data2)== 32'b0) ;
+
+    // region: comb
+    always @(*) begin
+        case(alu_ctrl) //synopsys full_case parallel_case
+            4'b0000: temp = data1 & data2;
+            4'b0001: temp = data1 | data2;
+            4'b0010: temp = data1 + data2;
+            4'b0110: temp = data1 - data2;
+            4'b1000: temp = (data1 < data2) ? 32'b1 : 32'b0;
+            default: temp = 32'b0;
+        endcase
+    end
+
+    // region: sequential
+
+endmodule
+
+// Single Cycle RISC-V CPU ALU Control Unit  
+
+module ALU_control (
+    op,
+    funct3,
+    funct7,
+    alu_ctrl
+);
+    // region: I/O
+
+    input   [4:3] op_43; //only need 2 bits
+    input   [2:0] funct3;
+    input   [5:5] funct7_5; //only need 5th bit
+    output  [3:0] alu_ctrl;
+
+    // region: spec
+
+    //    ALUCtrl[0] = OP[4] & funct3[2] & funct3[1] & (!funct3[0])
+    //    ALUCtrl[1] = !(OP[4] & (!OP[3]) & funct3[1])
+    //    ALUCtrl[2] = ((!OP[4]) & (!funct3[1])) | (funct7[5] & OP[4])
+    //    ALUCtrl[3] = OP[4] & (!funct3[2]) & funct3[1]
+
+    // Code Functions   Instructions
+    // 0000 AND         AND
+    // 0001 OR          OR
+    // 0010 ADD         SW, LW
+    // 0110 SUBSTRACT   SUB, Branch
+    // 1000 SLT         SL
+
+    // region: param
+
+    // region: func
+
+    // region: variable
+
+    // region: modules
+
+    // region: assign
+    assign alu_ctrl[0] = op_43[4] & funct3[2] & funct3[1] & (!funct3[0]);
+    assign alu_ctrl[1] = !(op_43[4] & (!op_43[3]) & funct3[1]);
+    assign alu_ctrl[2] = ((!op_43[4]) & (!funct3[1])) | (funct7_5 & op_43[4]);
+    assign alu_ctrl[3] = op_43[4] & (!funct3[2]) & funct3[1];
+
+    // region: comb
+
+    // region: sequential
+
+    
+endmodule
