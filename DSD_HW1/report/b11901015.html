@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>DSD HW1 Report</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.55;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h1 id="dsd-hw1-report">DSD HW1 Report</h1>
+<p>Author: b11901015 黃思維
+Date: 2024/03/26</p>
+<h2 id="1-alu">1. ALU</h2>
+<p><img src="file:////Users/swear/Library/CloudStorage/GoogleDrive-stanley.yellow1@gmail.com/我的雲端硬碟/document/學習紀錄/大三/數位系統設計/DSD_HW1/report/alu_assign.png" alt="alu_assign"><br>
+<img src="file:////Users/swear/Library/CloudStorage/GoogleDrive-stanley.yellow1@gmail.com/我的雲端硬碟/document/學習紀錄/大三/數位系統設計/DSD_HW1/report/alu_always.png" alt="alu_always"></p>
+<h2 id="2-register-file">2. Register File</h2>
+<p><img src="file:////Users/swear/Library/CloudStorage/GoogleDrive-stanley.yellow1@gmail.com/我的雲端硬碟/document/學習紀錄/大三/數位系統設計/DSD_HW1/report/register.png" alt="register"></p>
+<h2 id="how-i-verify-correctness">How I Verify Correctness</h2>
+<p>Actually I didn't use nWave during my development, since setting up X11 forwording is frustrating and not compatible with my vscode. (Actually It took me extra 1 hour to take these 3 screenshots)<br>
+So, how I verify the correctness of my design? Actually I write reference golden model in python, generate some random testcases, and compare the output of my design with the golden model.<br>
+I have highly confidence to my design, since I have verified it with the golden model with numerous testcases.</p>
+<p>Following is parts of the code:</p>
+<pre><code class="language-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">RegisterFile</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self</span>):
+        self.regfile = [<span class="hljs-number">0</span>] + [<span class="hljs-number">255</span>]* <span class="hljs-number">7</span>  <span class="hljs-comment"># 8 registers, each 8-bit wide</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">read</span>(<span class="hljs-params">self, rx, ry</span>) -&gt; <span class="hljs-built_in">tuple</span>[<span class="hljs-built_in">int</span>, <span class="hljs-built_in">int</span>]: <span class="hljs-comment"># bus_x and bus_y</span>
+        <span class="hljs-string">&quot;&quot;&quot;Read values from registers RX and RY.&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">return</span> self.regfile[rx], self.regfile[ry]
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">write</span>(<span class="hljs-params">self, wen, rw, bus_w</span>):
+        <span class="hljs-string">&quot;&quot;&quot;Write value to register RW if write enable (WEN) is set.&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> wen <span class="hljs-keyword">and</span> rw != <span class="hljs-number">0</span>: <span class="hljs-comment"># RW0 is hardwired to 0</span>
+            self.regfile[rw] = bus_w &amp; <span class="hljs-number">0xFF</span>  <span class="hljs-comment"># Ensure 8-bit storage</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">step</span>(<span class="hljs-params">self, wen, rw, rx, ry, bus_w</span>):
+        <span class="hljs-string">&quot;&quot;&quot;Read values from registers RX and RY, then write to register RW.&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># Write have 1 cycle delay, so read first</span>
+        out = self.read(rx, ry)
+        self.write(wen, rw, bus_w)
+        <span class="hljs-keyword">return</span> out
+</code></pre>
+<pre><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">alu_golden</span>(<span class="hljs-params">ctrl, x, y</span>):
+    carry = <span class="hljs-number">0</span>
+    <span class="hljs-keyword">if</span> ctrl == <span class="hljs-number">0b0000</span>:  <span class="hljs-comment"># Addition with carry</span>
+        result = (x + y) &amp; <span class="hljs-number">0xFF</span>  <span class="hljs-comment"># Ensure 8-bit result</span>
+        carry = ((x + y) &gt;&gt; <span class="hljs-number">8</span>) &amp; <span class="hljs-number">1</span>
+    <span class="hljs-keyword">elif</span> ctrl == <span class="hljs-number">0b0001</span>:  <span class="hljs-comment"># Subtraction with carry</span>
+        result = (x - y) &amp; <span class="hljs-number">0xFF</span>
+        carry = ((x - y) &gt;&gt; <span class="hljs-number">8</span>) &amp; <span class="hljs-number">1</span>
+    <span class="hljs-keyword">elif</span> ctrl == <span class="hljs-number">0b0010</span>:  <span class="hljs-comment"># Bitwise AND</span>
+        result = x &amp; y
+    <span class="hljs-keyword">elif</span> ctrl == <span class="hljs-number">0b0011</span>:  <span class="hljs-comment"># Bitwise OR</span>
+        result = x | y
+    <span class="hljs-keyword">elif</span> ctrl == <span class="hljs-number">0b0100</span>:  <span class="hljs-comment"># Bitwise NOT of x</span>
+        result = (~x) &amp; <span class="hljs-number">0xFF</span>
+    <span class="hljs-keyword">elif</span> ctrl == <span class="hljs-number">0b0101</span>:  <span class="hljs-comment"># Bitwise XOR</span>
+        result = x ^ y
+    <span class="hljs-keyword">elif</span> ctrl == <span class="hljs-number">0b0110</span>:  <span class="hljs-comment"># NOR</span>
+        result = (~(x | y)) &amp; <span class="hljs-number">0xFF</span>
+    <span class="hljs-keyword">elif</span> ctrl == <span class="hljs-number">0b0111</span>:  <span class="hljs-comment"># Left shift y by lower 3 bits of x</span>
+        result = (y &lt;&lt; (x &amp; <span class="hljs-number">0b111</span>)) &amp; <span class="hljs-number">0xFF</span>
+    <span class="hljs-keyword">elif</span> ctrl == <span class="hljs-number">0b1000</span>:  <span class="hljs-comment"># Right shift y by lower 3 bits of x</span>
+        result = (y &gt;&gt; (x &amp; <span class="hljs-number">0b111</span>)) &amp; <span class="hljs-number">0xFF</span>
+    <span class="hljs-keyword">elif</span> ctrl == <span class="hljs-number">0b1001</span>:  <span class="hljs-comment"># Arithmetic right shift x</span>
+        result = ((x &amp; <span class="hljs-number">0x80</span>) | (x &gt;&gt; <span class="hljs-number">1</span>)) &amp; <span class="hljs-number">0xFF</span>
+    <span class="hljs-keyword">elif</span> ctrl == <span class="hljs-number">0b1010</span>:  <span class="hljs-comment"># Left rotate x</span>
+        result = ((x &lt;&lt; <span class="hljs-number">1</span>) | ((x &gt;&gt; <span class="hljs-number">7</span>) &amp; <span class="hljs-number">1</span>)) &amp; <span class="hljs-number">0xFF</span>
+    <span class="hljs-keyword">elif</span> ctrl == <span class="hljs-number">0b1011</span>:  <span class="hljs-comment"># Right rotate x</span>
+        result = ((x &gt;&gt; <span class="hljs-number">1</span>) | ((x &amp; <span class="hljs-number">1</span>) &lt;&lt; <span class="hljs-number">7</span>)) &amp; <span class="hljs-number">0xFF</span>
+    <span class="hljs-keyword">elif</span> ctrl == <span class="hljs-number">0b1100</span>:  <span class="hljs-comment"># Equality comparison</span>
+        result = <span class="hljs-number">1</span> <span class="hljs-keyword">if</span> x == y <span class="hljs-keyword">else</span> <span class="hljs-number">0</span>
+    <span class="hljs-keyword">elif</span> ctrl <span class="hljs-keyword">in</span> (<span class="hljs-number">0b1101</span>, <span class="hljs-number">0b1110</span>, <span class="hljs-number">0b1111</span>):  <span class="hljs-comment"># Always 0 for these cases</span>
+        result = <span class="hljs-number">0</span>
+    <span class="hljs-keyword">else</span>:
+        result = <span class="hljs-number">0</span>  <span class="hljs-comment"># Default case</span>
+    
+    <span class="hljs-keyword">return</span> carry, result
+</code></pre>
+<p>The Following are parts of the testcases:
+ALU(OP, X, Y, C, OUT)</p>
+<pre><code class="language-csv">0000 11010000 00011010 0 11101010
+0000 01111101 00001011 0 10001000
+0000 10011100 00001110 0 10101010
+0000 01100010 01001111 0 10110001
+0001 01110100 10011110 1 11010110
+0001 10101100 11011001 1 11010011
+0001 10111000 01000011 0 01110101
+0001 01010001 10110110 1 10011011
+0010 01101001 11001101 0 01001001
+0010 00110001 11110011 0 00110001
+0010 01000110 00000001 0 00000000
+0010 11011110 10111111 0 10011110
+0011 11011000 00110100 0 11111100
+0011 10101100 10011110 0 10111110
+0011 00001101 01011001 0 01011101
+0011 00100000 00000111 0 00100111
+0100 00010101 10111101 0 11101010
+0100 11101000 01110111 0 00010111
+0100 10100100 11100011 0 01011011
+0100 11010011 10100111 0 00101100
+0101 01001111 00111100 0 01110011
+0101 01111001 01100101 0 00011100
+0101 10000001 00101011 0 10101010
+0101 11101011 10110111 0 01011100
+0110 01101111 11010011 0 00000000
+0110 01101001 11010100 0 00000010
+0110 11001000 00011001 0 00100110
+0110 11111111 00101110 0 00000000
+0111 00101010 01001110 0 00111000
+0111 11101101 01001101 0 10100000
+0111 00101011 10010000 0 10000000
+0111 11101010 01110111 0 11011100
+1000 00001110 11111000 0 00000011
+1000 10000000 00100010 0 00100010
+1000 10011010 10001000 0 00100010
+1000 00011100 00110011 0 00000011
+1001 01110010 00011010 0 00111001
+1001 01001101 10110111 0 00100110
+1001 00000001 10001001 0 00000000
+1001 01011111 10001011 0 00101111
+1010 11101110 01110011 0 11011101
+</code></pre>
+<p>REG(WREN, RW, RX, RY, BUSW, BUSX, BUSY)</p>
+<pre><code class="language-csv">1   0   0 000 00000000 00000000 00000000
+1   1   0 000 00000000 00000000 00000000
+1  10   0 000 00000000 00000000 00000000
+1  11   0 000 00000000 00000000 00000000
+1 100   0 000 00000000 00000000 00000000
+1 101   0 000 00000000 00000000 00000000
+1 110   0 000 00000000 00000000 00000000
+1 111   0 000 00000000 00000000 00000000
+0  10 111 000 10010011 00000000 00000000
+1  11   1 011 01001110 00000000 00000000
+0 111 101 110 01011011 00000000 00000000
+1  10   1 011 01010010 00000000 01001110
+0  10 111 011 00111001 00000000 01001110
+0  10 101 111 00000010 00000000 00000000
+1  10  10 000 01010001 01010010 00000000
+1 111 110 010 10000110 00000000 01010001
+1  10  10 011 00100000 01010001 01001110
+1   0 100 001 10000101 00000000 00000000
+1   0 110 111 11000100 00000000 10000110
+1   0 110 000 10100110 00000000 00000000
+1   1 101 000 10010111 00000000 00000000
+0 101   0 110 00111110 00000000 00000000
+1 111 110 100 10111110 00000000 00000000
+1  11 100 010 11010011 00000000 00100000
+1   0 111 100 10101011 10111110 00000000
+0  11   1 101 01111100 10010111 00000000
+0 111 110 000 00110001 00000000 00000000
+0   1 110 111 11011111 00000000 10111110
+1  10 101 010 01010000 00000000 00100000
+0   1 110 111 11100111 00000000 10111110
+1  10   0 000 00110110 00000000 00000000
+0  10  11 001 01000010 11010011 10010111
+1 100 110 111 00110010 00000000 10111110
+0 111 100 111 00100100 00110010 10111110
+0   0 110 101 01110011 00000000 00000000
+0 100   0 011 11100101 00000000 11010011
+1   1   0 001 01011101 00000000 10010111
+1  11 100 011 01010111 00110010 11010011
+0   0 101 010 01110101 00000000 00110110
+0 100 100 110 10100011 00110010 00000000
+0   1   0 001 10100001 00000000 01011101
+0 100   1 100 11000001 01011101 00110010
+0   1  10 101 00110101 00110110 00000000
+1  10 100 011 01011010 00110010 01010111
+0  11  10 110 01111111 01011010 00000000
+1   1   0 101 10111000 00000000 00000000
+</code></pre>
+<div style="page-break-after: always;"></div>
+<h2 id="what-i-have-found">What I have found</h2>
+<p>never trust copilot.<br>
+I spend 2 hours on debugging the Register.<br>
+When I finally found the bug, It was actually in simple_calculator.v.<br>
+Copilot connect these signals in an atrocious way. Actually, I manually corrected 6 signals before passing the test.<br>
+The folk is right, &quot;LLM won't make software engineer umemployed, but will create more jobs for debugging LLM generated code.&quot;</p>
+<p>A small complaint:<br>
+REGISTER FILE SHOULD HAVE A RESET SIGNAL!!!!!!!!<br>
+Since the testbench is given and doesn't manually reset the register file, I have to use some weird tricks to reset the register file.</p>
+
+            
+            
+        </body>
+        </html>
