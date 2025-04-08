@@ -35,7 +35,8 @@ input  [31:0] mem_rdata_I;  // instruction reading from I-mem
 // region: param  
 
 // region: func
-function ble_conv(input [31:0] data);
+function [31:0] ble_conv ;
+    input [31:0] data;
     // convertion between little-endian and big-endian
     // little-endian: 0x12345678 -> 0x78563412
     
@@ -43,7 +44,7 @@ function ble_conv(input [31:0] data);
 endfunction
 
 // region: variable
-wire [31:0] instruction; // alias of mem_rdata_I
+wire [31:0] instruction; // reordered
 wire [31:0] reg_write_data; // data to be written to register file
 wire [31:0] d_mem_mux;
 wire [31:0] alu_data_2;  // data2 for ALU
@@ -120,11 +121,11 @@ assign pc_add4 = pc + 4;
 assign adder_sum = pc + imm;
 assign mem_addr_I = pc;
 assign mem_addr_D = alu_result;
-assign mem_wen_D = ble_conv(mem_write);
+assign mem_wen_D = mem_write;
 assign mem_wdata_D = ble_conv(read_data2); // data to be written to D-mem
 
 //muxes
-assign pc_next = (jalr) ? (read_data1 + imm) : pc_add4;
+assign pc_next = (jalr) ? (read_data1 + imm) : pc_mux;
 assign pc_mux = (jal | branch & alu_zero) ? adder_sum : pc_add4;
 assign d_mem_mux = (mem_read) ? ble_conv(mem_rdata_D) : alu_result;
 assign alu_data_2 = (alu_src) ? imm : read_data2;
@@ -197,10 +198,10 @@ module Control (
     assign mem_read     = (instruction == 7'b0000011) ? 1'b1 : 1'b0 ;
     assign mem_write    = (instruction == 7'b0100011) ? 1'b1 : 1'b0 ;
     assign mem_to_reg   = (instruction == 7'b0000011) ? 1'b1 : 1'b0 ;
-    // Only R-type requires alu_src = 0
-    assign alu_src      = (instruction == 7'b0110011) ? 1'b0 : 1'b1 ;
-    // While SW, disallow reg_write
-    assign reg_write    = (instruction == 7'b0100011) ? 1'b0 : 1'b1 ;
+    // Only R-type and beq requires alu_src = 0
+    assign alu_src      = (instruction == 7'b0110011 || instruction == 7'b1100011) ? 1'b0 : 1'b1 ; // 0 = R-type, beq
+    // While SW, and beq disable reg_write
+    assign reg_write    = (instruction == 7'b0100011 || instruction == 7'b1100011) ? 1'b0 : 1'b1 ; // 0 = sw, beq
     // alu_op
     
 
@@ -244,16 +245,16 @@ module Imm_Gen (
 // TODO: implement by seperating into parts
 always @(*) begin
     case(instruction[6:0]) //synopsys full_case parallel_case
-        7'b0000011: // I-type
+        7'b0000011, 7'b1100111: // I-type
             imm = {{20{instruction[31]}}, instruction[30:20]};
         7'b0100011: // S-type
             imm = {{20{instruction[31]}}, instruction[30:25], instruction[11:7]};
         7'b1100011: // B-type
             imm = {{19{instruction[31]}}, instruction[7], instruction[30:25], instruction[11:8], 1'b0};
-        7'b1101111: // U-type
+        7'b0110111: // U-type //not used: lui
             imm = {instruction[31:12], 12'b0};
-        7'b1100111: // J-type
-            imm = {{11{instruction[31]}}, instruction[19:12], instruction[20], instruction[30:21], 1'b0};
+        7'b1101111: // J-type : jal
+            imm = {{12{instruction[31]}}, instruction[19:12], instruction[20], instruction[30:21], 1'b0};
         default: 
             imm = 32'b0; 
     endcase
@@ -269,8 +270,8 @@ module ALU(
     input       [31:0] data1,
     input       [31:0] data2,
     input       [ 3:0] alu_ctrl,
-    output reg  [31:0] result,
-    output             zero
+    output             zero,
+    output reg  [31:0] result
 );
 
     // region: I/O
@@ -291,23 +292,22 @@ module ALU(
     // region: func
 
     // region: variable
-    reg [31:0] temp;
 
 
     // region: modules
 
     // region: assign
-    assign zero = ((~ data1 ^ data2)== 32'b0) ;
+    assign zero = data1 == data2; // zero flag
 
     // region: comb
     always @(*) begin
         case(alu_ctrl) //synopsys full_case parallel_case
-            4'b0000: temp = data1 & data2;
-            4'b0001: temp = data1 | data2;
-            4'b0010: temp = data1 + data2;
-            4'b0110: temp = data1 - data2;
-            4'b1000: temp = (data1 < data2) ? 32'b1 : 32'b0;
-            default: temp = 32'b0;
+            4'b0000: result = data1 & data2;
+            4'b0001: result = data1 | data2;
+            4'b0010: result = data1 + data2;
+            4'b0110: result = data1 - data2;
+            4'b1000: result = (data1 < data2) ? 32'b1 : 32'b0;
+            default: result = 32'b0;
         endcase
     end
 
@@ -429,7 +429,7 @@ module register(
         regfile[0] <= 32'b0; // x0 is hardwired to 0
         if (~rst_n) begin // reset
             for (i = 1; i < 32; i = i + 1) begin
-                regfile[i] <= 32'h0;
+                regfile[i] <= 32'b0;
             end
         end else begin
             for (i = 1; i < 32; i = i + 1) begin

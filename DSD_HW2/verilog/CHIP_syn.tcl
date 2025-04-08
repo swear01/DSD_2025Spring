@@ -13,7 +13,7 @@ current_design [get_designs $DESIGN]
 #You may modified the clock constraints 
 #or add more constraints for your design
 ####################################################
-set cycle  10
+set cycle  3.8
 ####################################################
 
 #The following are design spec. for synthesis

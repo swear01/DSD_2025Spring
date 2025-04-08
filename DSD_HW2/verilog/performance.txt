@@ -1,2 +1,3 @@
-10.0
-80000.00
+set 3.8 can pass
+timing_max 4.04
+total cell area 79017.364648

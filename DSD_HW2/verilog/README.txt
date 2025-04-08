@@ -17,12 +17,12 @@ Files for synthesis:
 - CHIP_syn.tcl
 
 Synthesis command:
-    > dc_shell -f CHIP_syn.tcl
+dc_shell -f CHIP_syn.tcl
 
 - To reopen the design:
-    dc_shell> read_ddc CHIP_syn.ddc
+dc_shell> read_ddc CHIP_syn.ddc
 - Close Design Compiler:
-    dc_shell> exit
+dc_shell> exit
     
 --------------------------------------------------------------------------
 Post-synthesis simulation:
@@ -32,7 +32,7 @@ Post-synthesis simulation:
     >	cp /home/raid7_2/course/cvsd/CBDK_IC_Contest/CIC/Verilog/tsmc13.v .
 
 - simulation:
-    >	vcs RISCV_tb.v +define+SYN -full64 -R -debug_access+all +v2k
+    >	vcs RISCV_tb.v +define+SYN -full64 -R -debug_access+all +v2k +neg_tchk 
 --------------------------------------------------------------------------
 Pattern generation:
 - Open the python script in ./pattern/pattern_gen.py
