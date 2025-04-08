@@ -5,6 +5,8 @@ source /usr/cad/cadence/cshrc
 source /usr/cad/synopsys/CIC/vcs.cshrc
 source /usr/cad/synopsys/CIC/verdi.cshrc
 source /usr/cad/synopsys/CIC/synthesis.cshrc
+cd DSD_HW/DSD_HW2/verilog
+nWave &
 
 RTL simulation:
 vcs RISCV_tb.v +define+RV32I+RTL -full64 -R -debug_access+all +v2k
